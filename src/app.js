@@ -20,6 +20,13 @@ app.use(
   }),
 );
 
+// import the routes
+import heathCheckRouter from "./routes/heathcheck.routes.js";
+import authRouter from "./routes/auth.routes.js";
+
+app.use("/api/v1/auth", authRouter);
+app.use("/api/v1/healthcheck", heathCheckRouter);
+
 app.get("/", (req, res) => {
   res.send("welcome to projectCamp");
 });
