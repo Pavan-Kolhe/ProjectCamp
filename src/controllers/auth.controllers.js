@@ -4,6 +4,7 @@ import { ApiResponse } from "../utils/api-repsonse.js";
 import { asyncHandler } from "../utils/async-handler.js";
 import { sendEmail } from "../utils/mail.js";
 import { emailVerificationMailgenContent } from "../utils/mail.js";
+import jwt from "jsonwebtoken";
 
 const generateAccessAndRefreshTokens = async (userId) => {
   try {
@@ -83,4 +84,70 @@ const registerUser = asyncHandler(async (req, res) => {
     );
 });
 
-export { registerUser };
+//steps to login
+// take some Data from user
+// validate the data
+// check db if user exists
+// check password is correct
+// generate TOKENs
+// send tokens in cookies
+
+const login = asyncHandler(async (req, res) => {
+  const { email, username, password } = req.body;
+
+  if (!email && !username) {
+    throw new ApiError(400, "email or username are required");
+  }
+  if (!password) {
+    throw new ApiError(400, "password is required");
+  }
+
+  const user = await User.findOne({
+    $or: [{ email }, { username }],
+  });
+
+  if (!user) {
+    throw new ApiError(404, "User not found");
+  }
+
+  const isPasswordCorrect = await user.isPasswordCorrect(password);
+
+  if (!isPasswordCorrect) {
+    throw new ApiError(401, "Incorrect credentials");
+  }
+
+  const { accessToken, refreshToken } = await generateAccessAndRefreshTokens(
+    user._id,
+  );
+
+  const loggedInUser = await User.findById(user._id).select(
+    "-password -emailVerificationToken -refreshToken -emailVerificationExpiry",
+  );
+  if (!loggedInUser) {
+    throw new ApiError(500, "something went wrong while logging in user");
+  }
+
+  const options = {
+    httpOnly: true,
+    secure: true,
+    sameSite: "none",
+  };
+
+  return res
+    .status(200)
+    .cookie("accessToken", accessToken, options)
+    .cookie("refreshToken", refreshToken, options)
+    .json(
+      new ApiResponse(
+        200,
+        {
+          accessToken,
+          refreshToken,
+          user: loggedInUser,
+        },
+        "User logged in successfully",
+      ),
+    );
+});
+
+export { registerUser, login };

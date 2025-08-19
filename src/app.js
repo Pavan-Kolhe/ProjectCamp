@@ -1,5 +1,6 @@
 import express, { urlencoded } from "express";
 import cors from "cors";
+import cookieParser from "cookie-parser";
 const app = express();
 
 //  app.use() -> middleware
@@ -8,6 +9,7 @@ const app = express();
 app.use(express.json({ limit: "16kb" })); // body parser to accpt json data
 app.use(urlencoded({ extended: true }, { limit: "16kb" })); // to accept urlencoded data
 app.use(express.static("public")); // to enable serving static files from public folder
+app.use(cookieParser()); // to enable to send cookies
 
 //cors cnfig
 
