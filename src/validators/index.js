@@ -62,4 +62,59 @@ const userLoginValidator = () => {
   ];
 };
 
-export { userRegisterValidator, userLoginValidator };
+const userChangeCurrentPasswordValidator = () => {
+  return [
+    body("currentPassword")
+      .trim()
+      .notEmpty()
+      .withMessage("currentPassword is required"),
+    body("newPassword")
+      .trim()
+      .notEmpty()
+      .withMessage("password is required")
+      .isLength({ min: 8 })
+      .withMessage("password must be at least 8 characters long")
+      .matches(
+        /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/,
+      )
+      .withMessage(
+        "password must contain at least one uppercase letter, one lowercase letter, one number, and one special character",
+      ),
+  ];
+};
+
+const userForgotPasswordValidator = () => {
+  return [
+    body("email")
+      .trim()
+      .notEmpty()
+      .withMessage("email is required")
+      .isEmail()
+      .withMessage("email is Invalid"),
+  ];
+};
+
+const userResetForgotPasswordValidator = () => {
+  return [
+    body("newPassword")
+      .trim()
+      .notEmpty()
+      .withMessage("password is required")
+      .isLength({ min: 8 })
+      .withMessage("password must be at least 8 characters long")
+      .matches(
+        /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/,
+      )
+      .withMessage(
+        "password must contain at least one uppercase letter, one lowercase letter, one number, and one special character",
+      ),
+  ];
+};
+
+export {
+  userResetForgotPasswordValidator,
+  userForgotPasswordValidator,
+  userChangeCurrentPasswordValidator,
+  userRegisterValidator,
+  userLoginValidator,
+};
